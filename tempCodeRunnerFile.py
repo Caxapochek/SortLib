@@ -1,0 +1,1 @@
+aftser=self.canvas
