@@ -1,13 +1,8 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 import asyncio
 import random
-
-
-class App:
-    async def exec(self):
-        self.window = Window(asyncio.get_event_loop())
-        await self.window.show()
 
 
 class Window(tk.Tk):
@@ -16,6 +11,11 @@ class Window(tk.Tk):
         while True:
             self.root.update()
             await asyncio.sleep(0.1)
+    
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.root.destroy()
+            asyncio.get_running_loop().stop()
 
     def __init__(self, loop):
         self.win_wight = 600
@@ -24,10 +24,12 @@ class Window(tk.Tk):
 
         self.loop = loop
         self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.title('SortLib')
         self.root.wm_attributes('-alpha', 0.9)
         self.root.geometry(str(self.win_wight) + 'x' + str(self.win_height))
         self.root.resizable(width=False, height=False)
+
 
         self.frame = tk.Frame(bg='#ffffff')
         self.frame.place(relx=0.025, rely=0.15,
@@ -45,7 +47,7 @@ class Window(tk.Tk):
     def stop_sort(self):
         self.stop = True
 
-    async def btn_click(self, count, rect_wight, function):
+    def btn_click(self, count, rect_wight, function):
         self.stop = False
         arr = []
         rect_arr = []
@@ -65,7 +67,6 @@ class Window(tk.Tk):
         for i in range(0, count):
             rect_arr.append(self.canvas.create_rectangle(
                 10+rect_wight*i, 10+(255-arr[i])*2, 10+rect_wight+rect_wight*i, 600, fill='#'+'{:02X}'.format(arr[i])+'{:02X}'.format(255-arr[i])+'00'))
-        await asyncio.sleep(2)
 
         function.sort(self=self, arr=arr, rect_arr=rect_arr)
 
@@ -99,4 +100,6 @@ class BubbleSort(Function):
                 break
 
 
-asyncio.run(App().exec())
+
+window = Window(asyncio.get_event_loop())
+asyncio.run(window.show())
