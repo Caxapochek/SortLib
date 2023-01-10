@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import asyncio
 import random
+from functions import *
 
 
 class Window(tk.Tk):
@@ -48,7 +49,6 @@ class Window(tk.Tk):
         self.stop = True
 
     def btn_click(self, count, rect_wight, function):
-        self.stop = False
         arr = []
         rect_arr = []
 
@@ -69,35 +69,6 @@ class Window(tk.Tk):
                 10+rect_wight*i, 10+(255-arr[i])*2, 10+rect_wight+rect_wight*i, 600, fill='#'+'{:02X}'.format(arr[i])+'{:02X}'.format(255-arr[i])+'00'))
 
         function.sort(self=self, arr=arr, rect_arr=rect_arr)
-
-
-class Function():
-    def __init__() -> None:
-        pass
-
-    def sort(self):
-        raise NotImplementedError("The method not implemented")
-
-
-class BubbleSort(Function):
-    def sort(self, arr, rect_arr):
-        lenght = len(arr)
-        for i in range(0, lenght):
-            for j in range(i, lenght):
-                if (arr[i] > arr[j]):
-                    c = arr[i]
-                    arr[i] = arr[j]
-                    arr[j] = c
-                    r_c0 = self.canvas.coords(rect_arr[i])[
-                        0] - self.canvas.coords(rect_arr[j])[0]
-                    self.canvas.move(rect_arr[i], -r_c0, 0)
-                    self.canvas.move(rect_arr[j], r_c0, 0)
-                    rect_temp = rect_arr[i]
-                    rect_arr[i] = rect_arr[j]
-                    rect_arr[j] = rect_temp
-                    self.root.update()
-            if (self.stop):
-                break
 
 
 
