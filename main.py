@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import ttk
+from time import sleep
 import asyncio
 import random
 from functions import *
@@ -35,26 +35,41 @@ class Window(tk.Tk):
 
       
         # Textbox for enter the number of elements
-        self.entry = tk.Entry(width=20)
-        self.entry.insert(0, '100')
-        self.entry.grid(column=0, row=0, padx=10, pady=10)
+        self.entrylabel = tk.Label(text="Count:")
+        self.entrylabel.grid(column=0, row=0, padx=10, pady=4)
+        self.entry_count = tk.Entry(width=20)
+        self.entry_count.insert(0, '100')
+        self.entry_count.grid(column=1, row=0, padx=10, pady=4)
 
-        #OptionMenu for selecting the sorting method
+        
+        # Textbox for enter the sleep time
+        self.entrylabel = tk.Label(text="Sleep Time(msec):")
+        self.entrylabel.grid(column=0, row=2, padx=10, pady=4)
+        self.entry_sleep = tk.Entry(width=20)
+        self.entry_sleep.insert(0, '0.1')
+        self.entry_sleep.grid(column=1, row=2, padx=10, pady=4)
+
+        #OptionMenu for selecting the sorting method        
+        self.menulabel = tk.Label(text="Type:")
+        self.menulabel.grid(column=0, row=1, padx=10, pady=4)
         sort = Sort()
         OptionList = {
-        "BubbleSort":  sort.BubbleSort
+        "BubbleSort":  sort.BubbleSort,
+        "CocktailSort": sort.CocktailSort
         }
         variable = tk.StringVar(self.root)
         variable.set(list(OptionList.keys())[0])
 
-        opt = tk.OptionMenu(self.root, variable, *list(OptionList.keys()))
-        opt.config(width=10)
-        opt.grid(column=1, row=0, padx=10, pady=10)
+        self.opt = tk.OptionMenu(self.root, variable, *list(OptionList.keys()))
+        self.opt.config(width=10)
+        self.opt.grid(column=1, row=1, padx=10, pady=4)
 
         # Button for start sorting
         self.btn_start = tk.Button(text='Sort', bg='#f1f1ff',
-                             command=lambda: self.loop.create_task(self.StartSort(int(self.entry.get()), (self.win_wight-80)/int(self.entry.get()), OptionList.get(variable.get()))))
-        self.btn_start.grid(column=0, row=1, padx=10, pady=10)
+                             command=lambda: self.loop.create_task(self.StartSort(int(self.entry_count.get()), 
+                                                                    (self.win_wight-80)/int(self.entry_count.get()), 
+                                                                    OptionList.get(variable.get()),float(self.entry_sleep.get())/1000)))
+        self.btn_start.grid(column=2, row=2, padx=10, pady=4)
 
 
     async def show(self):   
@@ -74,11 +89,12 @@ class Window(tk.Tk):
             self.root.destroy()
             asyncio.get_running_loop().stop()  # Get running event loop in the current OS thread and stop them
 
+
     def stop_sort(self):
         self.stop = True
 
         
-    def StartSort(self, count, rect_width, function):
+    def StartSort(self, count, rect_width, function, sleep_time):
         """
         Func for start sorting 
 
@@ -106,11 +122,16 @@ class Window(tk.Tk):
         for i in range(0, count):
             arr.append(random.randint(0, 255))
         for i in range(0, count):
+            color = '#'+'{:02X}'.format(arr[i])+'{:02X}'.format(255-arr[i])+'00'
             rect_arr.append(self.canvas.create_rectangle(
-                10+rect_width*i, 10+(255-arr[i])*2, 10+rect_width+rect_width*i, 600, fill='#'+'{:02X}'.format(arr[i])+'{:02X}'.format(255-arr[i])+'00'))
+                10+rect_width*i, 10+(255-arr[i])*2, 10+rect_width+rect_width*i, 600, width = 0, fill=color))
 
+        # Update window
+        self.root.update()
+        sleep(1)
+        
         # Sort start
-        function(self.canvas, arr, rect_arr, self.stop, self.root, self)
+        function(arr, rect_arr, self, sleep_time)
         
         self.stop = True
         self.btn_start["state"] = "normal"
