@@ -7,26 +7,6 @@ from functions import *
 
 
 class Window(tk.Tk):
-
-
-    async def show(self):
-        """
-        Async method that updates the window
-        """
-        while True:
-            self.root.update()
-            await asyncio.sleep(0.1)
-
-
-    def on_closing(self):
-        """
-        The method that closes the window and asynchronous processes
-        """
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            self.root.destroy()
-            asyncio.get_running_loop().stop()  # Get running event loop in the current OS thread and stop them
-
-
     def __init__(self, loop):
         """
         The Default __init__ Constructor. Constructors are used to initializing the object’s state.
@@ -60,8 +40,9 @@ class Window(tk.Tk):
         self.entry.grid(column=0, row=0, padx=10, pady=10)
 
         #OptionMenu for selecting the sorting method
+        sort = Sort()
         OptionList = {
-        "BubbleSort":BubbleSort
+        "BubbleSort":  sort.BubbleSort
         }
         variable = tk.StringVar(self.root)
         variable.set(list(OptionList.keys())[0])
@@ -75,6 +56,23 @@ class Window(tk.Tk):
                              command=lambda: self.loop.create_task(self.StartSort(int(self.entry.get()), (self.win_wight-80)/int(self.entry.get()), OptionList.get(variable.get()))))
         self.btn_start.grid(column=0, row=1, padx=10, pady=10)
 
+
+    async def show(self):   
+        """
+        Async method that updates the window
+        """
+        while True:
+            self.root.update()
+            await asyncio.sleep(0.1)
+
+
+    def on_closing(self):
+        """
+        The method that closes the window and asynchronous processes
+        """
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.root.destroy()
+            asyncio.get_running_loop().stop()  # Get running event loop in the current OS thread and stop them
 
     def stop_sort(self):
         self.stop = True
@@ -112,7 +110,7 @@ class Window(tk.Tk):
                 10+rect_width*i, 10+(255-arr[i])*2, 10+rect_width+rect_width*i, 600, fill='#'+'{:02X}'.format(arr[i])+'{:02X}'.format(255-arr[i])+'00'))
 
         # Sort start
-        function.sort(self=self, arr=arr, rect_arr=rect_arr)
+        function(self.canvas, arr, rect_arr, self.stop, self.root, self)
         
         self.stop = True
         self.btn_start["state"] = "normal"
