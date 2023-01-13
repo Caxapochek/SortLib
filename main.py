@@ -66,9 +66,11 @@ class Window(tk.Tk):
 
         # Button for start sorting
         self.btn_start = tk.Button(text='Sort', bg='#f1f1ff',
-                             command=lambda: self.loop.create_task(self.StartSort(int(self.entry_count.get()), 
-                                                                    (self.win_wight-80)/int(self.entry_count.get()), 
-                                                                    OptionList.get(variable.get()),float(self.entry_sleep.get())/1000)))
+                             command=lambda: self.loop.create_task(
+                                 coro = self.StartSort(
+                                     self.entry_count.get(), 
+                                     OptionList.get(variable.get()),float(self.entry_sleep.get())),
+                                 name='sort_task'))
         self.btn_start.grid(column=2, row=2, padx=10, pady=4)
 
 
@@ -76,7 +78,8 @@ class Window(tk.Tk):
         """
         Async method that updates the window
         """
-        while True:
+        self.show = True
+        while self.show:
             self.root.update()
             await asyncio.sleep(0.1)
 
@@ -86,26 +89,33 @@ class Window(tk.Tk):
         The method that closes the window and asynchronous processes
         """
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.show = False
             self.root.destroy()
-            asyncio.get_running_loop().stop()  # Get running event loop in the current OS thread and stop them
 
 
     def stop_sort(self):
         self.stop = True
 
-        
-    def StartSort(self, count, rect_width, function, sleep_time):
+
+    def StartSort(self, count, function, sleep_time):
         """
         Func for start sorting 
 
         count: number of items to sort
-        rect_width: column width
         function: sorting method from functions.py
+        sleep_time: time the time between each comparison of numbers in the function
         """
+        
         arr = []
         rect_arr = []
         self.stop = False
         self.btn_start['state'] = "disabled"
+        if not self.Check_insert(count, sleep_time):
+            self.stop = True
+            self.btn_start["state"] = "normal"
+            return
+        count, sleep_time = int(count), float(sleep_time)/1000
+        rect_width = (self.win_wight-80)/count
 
         # Destroy and creating new canvas
         self.canvas.destroy()
@@ -135,6 +145,45 @@ class Window(tk.Tk):
         
         self.stop = True
         self.btn_start["state"] = "normal"
+
+
+    def Check_insert(self, count, sleep_time):
+        """
+        Func for checking count and sleep time
+
+        3 <= count <= 10000: number of items to sort 
+        0 <= sleep_time <= 10: time the time between each comparison of numbers in the function
+        """
+        if self.is_int(count) and self.is_float(sleep_time):
+            count, sleep_time = int(count), float(sleep_time)
+            
+            if count > 10000 or sleep_time > 10:
+                messagebox.showinfo("Info", "Input is too large!")
+                return False
+            if count < 3 or sleep_time < 0:
+                messagebox.showinfo("Info", "Input is too small!")
+                return False
+            return True
+        else:
+            messagebox.showinfo("Info", "Input is not correct!")
+            return False
+
+
+    def is_float(self, str):
+        try:
+            float(str)
+            return True
+        except ValueError:
+            return False
+
+    def is_int(self, str):
+        try:
+            int(str)
+            return True
+        except ValueError:
+            return False
+        
+        
 
 
 
