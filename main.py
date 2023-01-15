@@ -86,7 +86,7 @@ class Window(tk.Tk):
 
     def on_closing(self):
         """
-        The method that closes the window and asynchronous processes
+        The method that closes the window and asynchronous processes 
         """
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.show = False
